@@ -1,6 +1,6 @@
-# splunk-powershell-threat-detection-lab
+# Splunk PowerShell Threat Detection Lab
 
-Splunk PowerShell Threat Detection Lab
+
 
 A hands-on SOC and detection-engineering lab that uses Sysmon
 telemetry and Splunk Enterprise to detect suspicious PowerShell

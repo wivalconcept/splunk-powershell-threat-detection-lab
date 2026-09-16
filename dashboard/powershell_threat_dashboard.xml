@@ -1,0 +1,309 @@
+<form version="1.1" theme="dark">
+  <label>Splunk PowerShell Threat Detection Lab</label>
+  <description>SOC dashboard for monitoring and investigating suspicious PowerShell activity using Sysmon and Splunk.</description>
+  <fieldset submitButton="false">
+    <input type="time" token="field1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <title>Total PowerShell Threat Detections</title>
+        <search>
+          <query>index=* source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1 Image="*powershell.exe"
+| eval DetectionName=case(
+    like(CommandLine,"%scheduled-check.ps1%"), "Scheduled Task PowerShell Execution",
+    like(CommandLine,"%EncodedCommand%"), "Encoded PowerShell Command",
+    like(CommandLine,"%ExecutionPolicy Bypass%"), "PowerShell Execution Policy Bypass"
+)
+| where isnotnull(DetectionName)
+| stats count AS Total_Detections</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>High Severity Detections</title>
+        <search>
+          <query>index=* source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1 Image="*powershell.exe"
+| eval DetectionName=case(
+    like(CommandLine,"%scheduled-check.ps1%"), "Scheduled Task PowerShell Execution",
+    like(CommandLine,"%EncodedCommand%"), "Encoded PowerShell Command",
+    like(CommandLine,"%ExecutionPolicy Bypass%"), "PowerShell Execution Policy Bypass"
+)
+| eval Severity=case(
+    like(CommandLine,"%scheduled-check.ps1%"), "High",
+    like(CommandLine,"%EncodedCommand%"), "High",
+    like(CommandLine,"%ExecutionPolicy Bypass%"), "Medium"
+)
+| where isnotnull(DetectionName)
+| where Severity="High"
+| stats count AS High_Severity_Detections</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="rangeColors">["0x53a051","0xd41f1f"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="useColors">1</option>
+        <drilldown>
+          <link target="_blank">search?q=search%20index%3D*%20source%3D%22XmlWinEventLog%3AMicrosoft-Windows-Sysmon%2FOperational%22%20EventCode%3D1%20Image%3D%22*powershell.exe%22%20%7C%20eval%20Severity%3Dcase(like(CommandLine%2C%22%25scheduled-check.ps1%25%22)%2C%22High%22%2Clike(CommandLine%2C%22%25EncodedCommand%25%22)%2C%22High%22%2Clike(CommandLine%2C%22%25ExecutionPolicy%20Bypass%25%22)%2C%22Medium%22)%20%7C%20where%20Severity%3D%22High%22%20%7C%20eval%20DetectionName%3Dcase(like(CommandLine%2C%22%25scheduled-check.ps1%25%22)%2C%22Scheduled%20Task%20PowerShell%20Execution%22%2Clike(CommandLine%2C%22%25EncodedCommand%25%22)%2C%22Encoded%20PowerShell%20Command%22%2Clike(CommandLine%2C%22%25ExecutionPolicy%20Bypass%25%22)%2C%22PowerShell%20Execution%20Policy%20Bypass%22)%20%7C%20table%20_time%20Computer%20User%20DetectionName%20Severity%20ParentImage%20CommandLine%20%7C%20sort%20-%20_time&amp;earliest=$field1.earliest$&amp;latest=$field1.latest$</link>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Medium Severity Detections</title>
+        <search>
+          <query>index=* source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1 Image="*powershell.exe"
+| eval DetectionName=case(
+    like(CommandLine,"%scheduled-check.ps1%"), "Scheduled Task PowerShell Execution",
+    like(CommandLine,"%EncodedCommand%"), "Encoded PowerShell Command",
+    like(CommandLine,"%ExecutionPolicy Bypass%"), "PowerShell Execution Policy Bypass"
+)
+| eval Severity=case(
+    like(CommandLine,"%scheduled-check.ps1%"), "High",
+    like(CommandLine,"%EncodedCommand%"), "High",
+    like(CommandLine,"%ExecutionPolicy Bypass%"), "Medium"
+)
+| where isnotnull(DetectionName)
+| where Severity="Medium"
+| stats count AS Medium_Severity_Detections</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="rangeColors">["0x53a051","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,70,100]</option>
+        <option name="useColors">1</option>
+        <drilldown>
+          <link target="_blank">search?q=search%20index%3D*%20source%3D%22XmlWinEventLog%3AMicrosoft-Windows-Sysmon%2FOperational%22%20EventCode%3D1%20Image%3D%22*powershell.exe%22%20%7C%20eval%20Severity%3Dcase(like(CommandLine%2C%22%25scheduled-check.ps1%25%22)%2C%22High%22%2Clike(CommandLine%2C%22%25EncodedCommand%25%22)%2C%22High%22%2Clike(CommandLine%2C%22%25ExecutionPolicy%20Bypass%25%22)%2C%22Medium%22)%20%7C%20where%20Severity%3D%22Medium%22%20%7C%20eval%20DetectionName%3Dcase(like(CommandLine%2C%22%25scheduled-check.ps1%25%22)%2C%22Scheduled%20Task%20PowerShell%20Execution%22%2Clike(CommandLine%2C%22%25EncodedCommand%25%22)%2C%22Encoded%20PowerShell%20Command%22%2Clike(CommandLine%2C%22%25ExecutionPolicy%20Bypass%25%22)%2C%22PowerShell%20Execution%20Policy%20Bypass%22)%20%7C%20table%20_time%20Computer%20User%20DetectionName%20Severity%20ParentImage%20CommandLine%20%7C%20sort%20-%20_time&amp;earliest=$field1.earliest$&amp;latest=$field1.latest$</link>
+        </drilldown>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>PowerShell Detections by Severity</title>
+        <search>
+          <query>index=* source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1 Image="*powershell.exe"
+| eval DetectionName=case(
+    like(CommandLine,"%scheduled-check.ps1%"), "Scheduled Task PowerShell Execution",
+    like(CommandLine,"%EncodedCommand%"), "Encoded PowerShell Command",
+    like(CommandLine,"%ExecutionPolicy Bypass%"), "PowerShell Execution Policy Bypass"
+)
+| eval Severity=case(
+    like(CommandLine,"%scheduled-check.ps1%"), "High",
+    like(CommandLine,"%EncodedCommand%"), "High",
+    like(CommandLine,"%ExecutionPolicy Bypass%"), "Medium"
+)
+| where isnotnull(DetectionName)
+| stats count by Severity</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Detections by Type</title>
+        <search>
+          <query>index=* source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1 Image="*powershell.exe"
+| eval DetectionName=case(
+    like(CommandLine,"%scheduled-check.ps1%"), "Scheduled Task PowerShell Execution",
+    like(CommandLine,"%EncodedCommand%"), "Encoded PowerShell Command",
+    like(CommandLine,"%ExecutionPolicy Bypass%"), "PowerShell Execution Policy Bypass"
+)
+| where isnotnull(DetectionName)
+| stats count by DetectionName
+| sort - count</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">all</option>
+        <drilldown>
+          <link target="_blank">search?q=search%20index%3D*%20source%3D%22XmlWinEventLog%3AMicrosoft-Windows-Sysmon%2FOperational%22%20EventCode%3D1%20Image%3D%22*powershell.exe%22%20%7C%20eval%20DetectionName%3Dcase(like(CommandLine%2C%22%25scheduled-check.ps1%25%22)%2C%22Scheduled%20Task%20PowerShell%20Execution%22%2Clike(CommandLine%2C%22%25EncodedCommand%25%22)%2C%22Encoded%20PowerShell%20Command%22%2Clike(CommandLine%2C%22%25ExecutionPolicy%20Bypass%25%22)%2C%22PowerShell%20Execution%20Policy%20Bypass%22)%20%7C%20eval%20Severity%3Dcase(DetectionName%3D%22Scheduled%20Task%20PowerShell%20Execution%22%2C%22High%22%2CDetectionName%3D%22Encoded%20PowerShell%20Command%22%2C%22High%22%2CDetectionName%3D%22PowerShell%20Execution%20Policy%20Bypass%22%2C%22Medium%22)%20%7C%20where%20DetectionName%3D%22$click.value$%22%20%7C%20table%20_time%20Computer%20User%20DetectionName%20Severity%20ParentImage%20CommandLine%20%7C%20sort%20-%20_time&amp;earliest=$field1.earliest$&amp;latest=$field1.latest$</link>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Detection Trend Over Time</title>
+      <chart>
+        <search>
+          <query>index=* source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1 Image="*powershell.exe"
+| eval DetectionName=case(
+    like(CommandLine,"%scheduled-check.ps1%"), "Scheduled Task PowerShell Execution",
+    like(CommandLine,"%EncodedCommand%"), "Encoded PowerShell Command",
+    like(CommandLine,"%ExecutionPolicy Bypass%"), "PowerShell Execution Policy Bypass"
+)
+| where isnotnull(DetectionName)
+| timechart span=1h count AS Detections</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <drilldown>
+          <link target="_blank">search?q=search%20index%3D*%20source%3D%22XmlWinEventLog%3AMicrosoft-Windows-Sysmon%2FOperational%22%20EventCode%3D1%20Image%3D%22*powershell.exe%22%20%7C%20eval%20DetectionName%3Dcase(like(CommandLine%2C%22%25scheduled-check.ps1%25%22)%2C%22Scheduled%20Task%20PowerShell%20Execution%22%2Clike(CommandLine%2C%22%25EncodedCommand%25%22)%2C%22Encoded%20PowerShell%20Command%22%2Clike(CommandLine%2C%22%25ExecutionPolicy%20Bypass%25%22)%2C%22PowerShell%20Execution%20Policy%20Bypass%22)%20%7C%20where%20isnotnull(DetectionName)%20%7C%20eval%20Severity%3Dcase(DetectionName%3D%22Scheduled%20Task%20PowerShell%20Execution%22%2C%22High%22%2CDetectionName%3D%22Encoded%20PowerShell%20Command%22%2C%22High%22%2CDetectionName%3D%22PowerShell%20Execution%20Policy%20Bypass%22%2C%22Medium%22)%20%7C%20where%20_time%3E%3D$click.value$%20AND%20_time%3C($click.value$%2B3600)%20%7C%20table%20_time%20Computer%20User%20DetectionName%20Severity%20ParentImage%20CommandLine%20%7C%20sort%20-%20_time&amp;earliest=$field1.earliest$&amp;latest=$field1.latest$</link>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  
+  <row>
+    <panel>
+      <table>
+        <title>Recent PowerShell Threat Detections</title>
+        <search>
+          <query>index=* source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1 Image="*powershell.exe"
+| eval DetectionName=case(
+    like(CommandLine,"%scheduled-check.ps1%"), "Scheduled Task PowerShell Execution",
+    like(CommandLine,"%EncodedCommand%"), "Encoded PowerShell Command",
+    like(CommandLine,"%ExecutionPolicy Bypass%"), "PowerShell Execution Policy Bypass"
+)
+| where isnotnull(DetectionName)
+| eval Severity=case(
+    DetectionName="Scheduled Task PowerShell Execution", "High",
+    DetectionName="Encoded PowerShell Command", "High",
+    DetectionName="PowerShell Execution Policy Bypass", "Medium"
+)
+| eval MITRE_Technique=case(
+    DetectionName="Scheduled Task PowerShell Execution", "T1053.005 / T1059.001",
+    DetectionName="Encoded PowerShell Command", "T1059.001",
+    DetectionName="PowerShell Execution Policy Bypass", "T1059.001"
+)
+| eval MITRE_Name=case(
+    DetectionName="Scheduled Task PowerShell Execution", "Scheduled Task + PowerShell",
+    DetectionName="Encoded PowerShell Command", "Command and Scripting Interpreter: PowerShell",
+    DetectionName="PowerShell Execution Policy Bypass", "Command and Scripting Interpreter: PowerShell"
+)
+| table _time Computer User DetectionName Severity MITRE_Technique MITRE_Name ParentImage CommandLine
+| sort - _time</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">row</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+  <link target="_blank">
+    <![CDATA[
+      /app/search/search?q=search%20index%3D*%20source%3D%22XmlWinEventLog%3AMicrosoft-Windows-Sysmon%2FOperational%22%20EventCode%3D1%20Image%3D%22*powershell.exe%22%20%7C%20eval%20DetectionName%3Dcase%28like%28CommandLine%2C%22%25scheduled-check.ps1%25%22%29%2C%22Scheduled%20Task%20PowerShell%20Execution%22%2Clike%28CommandLine%2C%22%25EncodedCommand%25%22%29%2C%22Encoded%20PowerShell%20Command%22%2Clike%28CommandLine%2C%22%25ExecutionPolicy%20Bypass%25%22%29%2C%22PowerShell%20Execution%20Policy%20Bypass%22%29%20%7C%20where%20isnotnull%28DetectionName%29%20%7C%20where%20DetectionName%3D%22$row.DetectionName$%22
+    ]]>
+  </link>
+</drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>MITRE ATT&amp;CK Techniques</title>
+      <chart>
+        <search>
+          <query>index=* source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1 Image="*powershell.exe"
+| eval DetectionName=case(
+    like(CommandLine,"%scheduled-check.ps1%"), "Scheduled Task PowerShell Execution",
+    like(CommandLine,"%EncodedCommand%"), "Encoded PowerShell Command",
+    like(CommandLine,"%ExecutionPolicy Bypass%"), "PowerShell Execution Policy Bypass"
+)
+| where isnotnull(DetectionName)
+| eval MITRE_Technique=case(
+    DetectionName="Scheduled Task PowerShell Execution", "T1053.005 / T1059.001",
+    DetectionName="Encoded PowerShell Command", "T1059.001",
+    DetectionName="PowerShell Execution Policy Bypass", "T1059.001"
+)
+| stats count AS Detections by MITRE_Technique
+| sort - Detections</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+</form>

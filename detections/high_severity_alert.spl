@@ -1,0 +1,26 @@
+index=* source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1 Image="*powershell.exe"
+| eval DetectionName=case(
+    like(CommandLine,"%scheduled-check.ps1%"), "Scheduled Task PowerShell Execution",
+    like(CommandLine,"%EncodedCommand%"), "Encoded PowerShell Command",
+    like(CommandLine,"%ExecutionPolicy Bypass%"), "PowerShell Execution Policy Bypass"
+)
+| where isnotnull(DetectionName)
+| eval Severity=case(
+    DetectionName="Scheduled Task PowerShell Execution", "High",
+    DetectionName="Encoded PowerShell Command", "High",
+    DetectionName="PowerShell Execution Policy Bypass", "Medium"
+)
+| eval MITRE_Technique=case(
+    DetectionName="Scheduled Task PowerShell Execution", "T1053.005 / T1059.001",
+    DetectionName="Encoded PowerShell Command", "T1059.001",
+    DetectionName="PowerShell Execution Policy Bypass", "T1059.001"
+)
+| eval MITRE_Name=case(
+    DetectionName="Scheduled Task PowerShell Execution", "Scheduled Task + PowerShell",
+    DetectionName="Encoded PowerShell Command", "Command and Scripting Interpreter: PowerShell",
+    DetectionName="PowerShell Execution Policy Bypass", "Command and Scripting Interpreter: PowerShell"
+)
+| where Severity="High"
+| table _time Computer User DetectionName Severity MITRE_Technique MITRE_Name ParentImage CommandLine
+| sort - _time

@@ -126,7 +126,7 @@ Correlate surrounding endpoint activity before deciding whether
 escalation is required.
 
 Validation
-
+``
 The project validates the following end-to-end workflow:
 
 PowerShell activity
@@ -144,7 +144,7 @@ MITRE ATT&CK enrichment
 Scheduled alert
         ↓
 Dashboard / analyst investigation
-
+```
 High- and medium-severity alert trigger histories were used to confirm
 that the scheduled searches fired successfully.
 

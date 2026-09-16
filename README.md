@@ -144,7 +144,7 @@ MITRE ATT&CK enrichment
 Scheduled alert
         ↓
 Dashboard / analyst investigation
-```
+``
 High- and medium-severity alert trigger histories were used to confirm
 that the scheduled searches fired successfully.
 
